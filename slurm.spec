@@ -1,32 +1,6 @@
-# -------------
-# Base Packages
-# -------------
-# slurm
-# slurm-devel
-# slurm-doc
-# slurm-gui
-# slurm-libs
-# slurm-plugins
-# slurm-plugins-auth_none
-# slurm-plugins-lua
-# slurm-plugins-munge
-# slurm-plugins-mysql
-# slurm-plugins-pbs
-# slurm-plugins-rrdtool
-# slurm-slurmdbd
-
-# -----------------
-# Contribs Packages
-# -----------------
-# slurm-contribs
-# slurm-openlava
-# slurm-perlapi
-# slurm-plugins-pam_slurm
-# slurm-torque
-
 Name:           slurm
-Version:        17.02.9
-Release:        3%{?dist}
+Version:        17.02.10
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -752,6 +726,10 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Fri Mar 16 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.02.10-1
+- Release of 17.02.10
+- Closes security issue CVE-2018-7033
+
 * Thu Nov 16 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.9-3
 - Added patch to enable full relro builds and operation.
 - Added patch to link knl_generic plugin to libnuma if available.
