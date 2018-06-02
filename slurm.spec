@@ -1,5 +1,5 @@
 Name:           slurm
-Version:        17.02.10
+Version:        17.02.11
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -726,6 +726,10 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Fri Jun 1 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.02.11-1
+- Release of 17.02.11
+- Closes security issue CVE-2018-10995
+
 * Fri Mar 16 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.02.10-1
 - Release of 17.02.10
 - Closes security issue CVE-2018-7033
