@@ -30,7 +30,8 @@ Patch0:         slurm_libslurmfull_version.patch
 Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
 Patch12:        slurm_doc_fix.patch
-Patch13:        slurm_do_not_build_cray.patch
+Patch13:        slurm_without_cray.patch
+Patch14:        slurm_without_pmi.patch
 
 # Fedora-related patches
 Patch20:        slurm_pmix_soname.patch
@@ -191,6 +192,7 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1
 %patch20 -p1
 %patch21 -p1
 %patch22 -p1
@@ -350,10 +352,6 @@ install -m 0644 contribs/lua/proctrack.lua %{buildroot}%{_docdir}/%{name}/contri
 
 # remove libtool archives
 find %{buildroot} -name \*.a -o -name \*.la | xargs rm -f
-# remove pmi/pmi2 headers which are provided by pmix dependency
-rm -rf %{buildroot}%{_includedir}/%{name}/pmi*.h
-# remove libpmi/pmi2 libraries which are provided by pmix dependency
-rm -rf %{buildroot}%{_libdir}/libpmi*.so*
 # remove libslurmfull symlink (non-development, internal library)
 rm -rf %{buildroot}%{_libdir}/libslurmfull.so
 # remove auth_none plugin
