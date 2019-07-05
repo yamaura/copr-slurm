@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        19.05.0
-Release:        5%{?dist}
+Version:        18.08.7
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -25,8 +25,6 @@ Source5:        slurm-setuser.in
 
 # Upstream bug #4449: release-style versioning of libslurmfull
 Patch0:         slurm_libslurmfull_version.patch
-# Upstream bug #7197: fix 19.05.0 testsuite
-Patch1:         slurm_fix_testsuite.patch
 
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
@@ -46,7 +44,6 @@ BuildRequires:  gcc
 BuildRequires:  perl-devel
 BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
-BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
 BuildRequires:  pkgconf
 BuildRequires:  pkgconfig(check)
@@ -66,6 +63,7 @@ BuildRequires:  pkgconfig(lua)
 BuildRequires:  pkgconfig(mariadb)
 BuildRequires:  pkgconfig(munge)
 BuildRequires:  pkgconfig(ncurses)
+BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(pmix) >= 2.0.0
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  readline-devel
@@ -75,10 +73,6 @@ BuildRequires:  readline-devel
 BuildRequires:  rdma-core-devel
 BuildRequires:  numactl-devel
 %endif
-
-# exclude upstream-deprecated 32-bit architectures
-ExcludeArch:    armv7hl
-ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix >= 2.0.0
@@ -160,15 +154,6 @@ Slurm contribution package which includes the programs seff,
 sjobexitmod, sjstat and smail.  See their respective man pages
 for more information.
 
-%package nss_slurm
-Summary: NSS plugin for slurm
-Requires: %{name}-libs%{?_isa} = %{version}-%{release}
-%description nss_slurm
-nss_slurm is an optional NSS plugin that can permit passwd and group resolution
-for a job on the compute node to be serviced through the local slurmstepd
-process, rather than through some alternate network-based service such as LDAP,
-SSSD, or NSLCD.
-
 %package openlava
 Summary: Openlava/LSF wrappers for transition from OpenLava/LSF to Slurm
 Requires: %{name}-perlapi%{?_isa} = %{version}-%{release}
@@ -202,7 +187,6 @@ Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 %prep
 %setup -q -n %{name_version}
 %patch0 -p1
-%patch1 -p1
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
@@ -362,7 +346,7 @@ done
 # contribs docs
 install -d -m 0755 %{buildroot}%{_docdir}/%{name}/contribs/lua
 install -m 0644 contribs/README %{buildroot}%{_docdir}/%{name}/contribs
-install -m 0644 contribs/lua/*.lua %{buildroot}%{_docdir}/%{name}/contribs/lua
+install -m 0644 contribs/lua/proctrack.lua %{buildroot}%{_docdir}/%{name}/contribs/lua
 
 # remove libtool archives
 find %{buildroot} -name \*.a -o -name \*.la | xargs rm -f
@@ -378,7 +362,18 @@ rm -f %{buildroot}%{_libdir}/%{name}/auth_none.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_defaults.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_logging.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_partition.so
+# remove bluegene files
+rm -f %{buildroot}%{_libdir}/%{name}/select_bluegene.so
+rm -f %{buildroot}%{_mandir}/man5/bluegene*
 # remove cray files
+rm -f %{buildroot}%{_libdir}/%{name}/acct_gather_energy_cray.so
+rm -f %{buildroot}%{_libdir}/%{name}/core_spec_cray.so
+rm -f %{buildroot}%{_libdir}/%{name}/job_container_cncu.so
+rm -f %{buildroot}%{_libdir}/%{name}/job_submit_cray.so
+rm -f %{buildroot}%{_libdir}/%{name}/select_alps.so
+rm -f %{buildroot}%{_libdir}/%{name}/select_cray.so
+rm -f %{buildroot}%{_libdir}/%{name}/switch_cray.so
+rm -f %{buildroot}%{_libdir}/%{name}/task_cray.so
 rm -f %{buildroot}%{_mandir}/man5/cray*
 # remove perl cruft
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/.packlist
@@ -417,12 +412,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
 %{_libdir}/%{name}/checkpoint_{none,ompi}.so
-%{_libdir}/%{name}/cli_filter_none.so
 %{_libdir}/%{name}/core_spec_none.so
-%{_libdir}/%{name}/cred_{munge,none}.so
+%{_libdir}/%{name}/crypto_munge.so
+%{_libdir}/%{name}/crypto_openssl.so
 %{_libdir}/%{name}/ext_sensors_none.so
-%{_libdir}/%{name}/gres_{gpu,mic,mps,nic}.so
-%{_libdir}/%{name}/gpu_generic.so
+%{_libdir}/%{name}/gres_{gpu,mic,nic}.so
 %{_libdir}/%{name}/job_container_none.so
 %{_libdir}/%{name}/job_submit_all_partitions.so
 %{_libdir}/%{name}/job_submit_lua.so
@@ -442,8 +436,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/proctrack_{cgroup,linuxproc,lua,pgid}.so
 %{_libdir}/%{name}/route_{default,topology}.so
 %{_libdir}/%{name}/sched_{backfill,builtin,hold}.so
-%{_libdir}/%{name}/select_{cons_res,cons_tres,linear,serial}.so
-%{_libdir}/%{name}/site_factor_none.so
+%{_libdir}/%{name}/select_{cons_res,linear,serial}.so
 %{_libdir}/%{name}/slurmctld_nonstop.so
 %{_libdir}/%{name}/switch_{generic,none}.so
 %{_libdir}/%{name}/task_{affinity,cgroup,none}.so
@@ -515,6 +508,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 
 %files libs
 %{_libdir}/libslurm.so.*
+%{_libdir}/libslurmdb.so.*
 %{_libdir}/libslurmfull-*.so
 
 # -------------
@@ -569,7 +563,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_docdir}/%{name}/contribs
 %dir %{_docdir}/%{name}/contribs/lua
 %{_docdir}/%{name}/contribs/README
-%{_docdir}/%{name}/contribs/lua/*.lua
+%{_docdir}/%{name}/contribs/lua/proctrack.lua
 %{_bindir}/seff
 %{_bindir}/sgather
 %{_bindir}/sjobexitmod
@@ -578,13 +572,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man1/sgather.1*
 %{_mandir}/man1/sjobexitmod.1*
 %{_mandir}/man1/sjstat.1*
-
-# ---------------
-# Slurm-nss_slurm
-# ---------------
-
-%files nss_slurm
-%{_libdir}/libnss_slurm.so.2
 
 # --------------
 # Slurm-openlava
@@ -679,32 +666,17 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
-* Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-5
+* Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-3
 - Do not install slurm implementation of libpmi/pmi2 libraries
 - in favor of the faster implementation provided by pmix
 - Remove pmi environment module formerly used to select the slurm
 - vs pmix implementations of libpmi/pmi2
 
-* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-4
+* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-2
 - Correct the configure for pmix
 - Correct the slurm_pmix_soname patch
-
-* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-3
-- Stop using autotools macros that were removed from rpm
-
-* Sun Jun 9 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-2
-- Exclude upstream-deprecated 32-bit architectures
-
-* Sun Jun 9 2019 Philip Kovacs <pkdevel@yahoo.com> - 19.05.0-1
-- Release of 19.05.0
-- Added nss_plugin subpackage for optional nss plugin
-- Added patch to fix 19.05.0 testsuite
-- Adjusted cray patch to remove all cray, cray_aries plugins
-- Reflect all upstream plugin additions/deletions
-- Remove openssl build dependency
-
-* Thu May 30 2019 Jitka Plesnikova <jplesnik@redhat.com> - 18.08.7-2
-- Perl 5.30 rebuild
+- Use make_build macro instead of make
+- Use autotools commands instead of rpm macros
 
 * Fri Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
 - Release of 18.08.7
