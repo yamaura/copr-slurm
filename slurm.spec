@@ -11,8 +11,8 @@
 %undefine _strict_symbol_defs_build
 
 Name:           slurm
-Version:        18.08.7
-Release:        3%{?dist}
+Version:        18.08.8
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -53,6 +53,7 @@ BuildRequires:  systemd
 
 BuildRequires:  hdf5-devel
 BuildRequires:  pam-devel
+BuildRequires:  rdma-core-devel
 BuildRequires:  pkgconfig(gtk+-2.0)
 BuildRequires:  pkgconfig(hwloc)
 BuildRequires:  pkgconfig(libcurl)
@@ -69,14 +70,21 @@ BuildRequires:  pkgconfig(pmix) >= 2.0.0
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  readline-devel
 
-# follow arch exclusions for these devel packages
-%ifnarch s390 s390x %{arm}
-BuildRequires:  rdma-core-devel
+# follow arch exclusions for numa
+%ifnarch %{arm}
 BuildRequires:  numactl-devel
+%endif
+
+# follow arch-inclusions for ucx
+%ifarch aarch64 ppc64le x86_64
+BuildRequires:  pkgconfig(ucx)
 %endif
 
 Requires:       munge
 Requires:       pmix >= 2.0.0
+%ifarch aarch64 ppc64le x86_64
+Requires:       ucx
+%endif
 %{?systemd_requires}
 
 %description
@@ -217,6 +225,9 @@ automake --no-force
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
+%ifarch aarch64 ppc64le x86_64
+  --with-ucx=%{_prefix} \
+%endif
   --enable-shared \
   --enable-x11 \
   --disable-static \
@@ -664,6 +675,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon Jul 15 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.8-1
+- Release of 18.08.8
+- Closes security issue (CVE-2019-12838)
+- Configure for UCX support on supported arches
+
 * Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-3
 - Do not install slurm implementation of libpmi/pmi2 libraries
 - in favor of the faster implementation provided by pmix
