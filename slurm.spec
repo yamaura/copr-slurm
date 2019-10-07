@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 1
+%global ups_rel 2
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -14,12 +14,9 @@
 %bcond_with ucx
 %endif
 
-# Allow linkage with undefined symbols (disable -z,defs)
-%undefine _strict_symbol_defs_build
-
 Name:           slurm
-Version:        18.08.8
-Release:        2%{?dist}
+Version:        19.05.3
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -36,8 +33,7 @@ Patch0:         slurm_libslurmfull_version.patch
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
-Patch12:        slurm_doc_fix.patch
-Patch13:        slurm_without_cray.patch
+Patch12:        slurm_without_cray.patch
 
 # Fedora-related patches
 Patch20:        slurm_pmix_soname.patch
@@ -69,6 +65,7 @@ BuildRequires:  lz4-devel
 BuildRequires:  mariadb-devel
 BuildRequires:  munge-devel
 BuildRequires:  ncurses-devel
+BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
 BuildRequires:  pmix-devel
 BuildRequires:  rdma-core-devel
@@ -80,10 +77,9 @@ BuildRequires:  zlib-devel
 BuildRequires:  ucx-devel
 %endif
 
-# follow arch exclusions for numa
-%ifnarch %{arm}
-BuildRequires:  numactl-devel
-%endif
+# exclude upstream-deprecated 32-bit architectures
+ExcludeArch:    armv7hl
+ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix
@@ -184,6 +180,15 @@ Slurm contribution package which includes the programs seff,
 sjobexitmod, sjstat and smail.  See their respective man pages
 for more information.
 
+%package nss_slurm
+Summary: NSS plugin for slurm
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+%description nss_slurm
+nss_slurm is an optional NSS plugin that can permit passwd and group resolution
+for a job on the compute node to be serviced through the local slurmstepd
+process, rather than through some alternate network-based service such as LDAP,
+SSSD, or NSLCD.
+
 %package openlava
 Summary: Openlava/LSF wrappers for transition from OpenLava/LSF to Slurm
 Requires: %{name}-perlapi%{?_isa} = %{version}-%{release}
@@ -215,15 +220,7 @@ Requires: %{name}-perlapi%{?_isa} = %{version}-%{release}
 Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm.
 
 %prep
-%setup -q -n %{name_version}
-%patch0 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch20 -p1
-%patch21 -p1
-%patch22 -p1
+%autosetup -p1 -n %{name_version}
 cp %SOURCE1 etc/slurm.conf
 cp %SOURCE1 etc/slurm.conf.example
 cp %SOURCE2 etc/slurmdbd.conf
@@ -366,7 +363,7 @@ done
 # contribs docs
 install -d -m 0755 %{buildroot}%{_docdir}/%{name}/contribs/lua
 install -m 0644 contribs/README %{buildroot}%{_docdir}/%{name}/contribs
-install -m 0644 contribs/lua/proctrack.lua %{buildroot}%{_docdir}/%{name}/contribs/lua
+install -m 0644 contribs/lua/*.lua %{buildroot}%{_docdir}/%{name}/contribs/lua
 
 # remove libtool archives
 find %{buildroot} -name \*.a -o -name \*.la | xargs rm -f
@@ -378,18 +375,7 @@ rm -f %{buildroot}%{_libdir}/%{name}/auth_none.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_defaults.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_logging.so
 rm -f %{buildroot}%{_libdir}/%{name}/job_submit_partition.so
-# remove bluegene files
-rm -f %{buildroot}%{_libdir}/%{name}/select_bluegene.so
-rm -f %{buildroot}%{_mandir}/man5/bluegene*
 # remove cray files
-rm -f %{buildroot}%{_libdir}/%{name}/acct_gather_energy_cray.so
-rm -f %{buildroot}%{_libdir}/%{name}/core_spec_cray.so
-rm -f %{buildroot}%{_libdir}/%{name}/job_container_cncu.so
-rm -f %{buildroot}%{_libdir}/%{name}/job_submit_cray.so
-rm -f %{buildroot}%{_libdir}/%{name}/select_alps.so
-rm -f %{buildroot}%{_libdir}/%{name}/select_cray.so
-rm -f %{buildroot}%{_libdir}/%{name}/switch_cray.so
-rm -f %{buildroot}%{_libdir}/%{name}/task_cray.so
 rm -f %{buildroot}%{_mandir}/man5/cray*
 # remove perl cruft
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/.packlist
@@ -428,11 +414,12 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
 %{_libdir}/%{name}/checkpoint_{none,ompi}.so
+%{_libdir}/%{name}/cli_filter_none.so
 %{_libdir}/%{name}/core_spec_none.so
-%{_libdir}/%{name}/crypto_munge.so
-%{_libdir}/%{name}/crypto_openssl.so
+%{_libdir}/%{name}/cred_{munge,none}.so
 %{_libdir}/%{name}/ext_sensors_none.so
-%{_libdir}/%{name}/gres_{gpu,mic,nic}.so
+%{_libdir}/%{name}/gres_{gpu,mic,mps,nic}.so
+%{_libdir}/%{name}/gpu_generic.so
 %{_libdir}/%{name}/job_container_none.so
 %{_libdir}/%{name}/job_submit_all_partitions.so
 %{_libdir}/%{name}/job_submit_lua.so
@@ -452,7 +439,8 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/proctrack_{cgroup,linuxproc,lua,pgid}.so
 %{_libdir}/%{name}/route_{default,topology}.so
 %{_libdir}/%{name}/sched_{backfill,builtin,hold}.so
-%{_libdir}/%{name}/select_{cons_res,linear,serial}.so
+%{_libdir}/%{name}/select_{cons_res,cons_tres,linear,serial}.so
+%{_libdir}/%{name}/site_factor_none.so
 %{_libdir}/%{name}/slurmctld_nonstop.so
 %{_libdir}/%{name}/switch_{generic,none}.so
 %{_libdir}/%{name}/task_{affinity,cgroup,none}.so
@@ -523,7 +511,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 
 %files libs
 %{_libdir}/libslurm.so.*
-%{_libdir}/libslurmdb.so.*
 %{_libdir}/libslurmfull-*.so
 
 # ---------
@@ -595,7 +582,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_docdir}/%{name}/contribs
 %dir %{_docdir}/%{name}/contribs/lua
 %{_docdir}/%{name}/contribs/README
-%{_docdir}/%{name}/contribs/lua/proctrack.lua
+%{_docdir}/%{name}/contribs/lua/*.lua
 %{_bindir}/seff
 %{_bindir}/sgather
 %{_bindir}/sjobexitmod
@@ -604,6 +591,13 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man1/sgather.1*
 %{_mandir}/man1/sjobexitmod.1*
 %{_mandir}/man1/sjstat.1*
+
+# ---------------
+# Slurm-nss_slurm
+# ---------------
+
+%files nss_slurm
+%{_libdir}/libnss_slurm.so.2
 
 # --------------
 # Slurm-openlava
@@ -698,66 +692,93 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
-* Sun Jul 21 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.8-2
+* Mon Oct 7 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.3-1
+- Release of 19.05.3
+
+* Sun Aug 25 2019 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 19.05.2-2
+- Rebuilt for hwloc-2.0
+
+* Tue Aug 13 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.2-1
+- Release of 19.05.2
+
+* Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 19.05.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
+* Sun Jul 21 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.1-2
 - Create slurm-pmi and slurm-pmi-devel subpackages for pmi/pmi2 libs
 - Remove rpm-generated pkgconfig files until upstream provides them
 - Do not pull dependencies with pkgconfig unless package uses it
 
-* Mon Jul 15 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.8-1
-- Release of 18.08.8
+* Mon Jul 15 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.1-1
+- Release of 19.05.1
 - Closes security issue (CVE-2019-12838)
 - Configure for UCX support on supported arches
 
-* Tue Jul 2 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-3
+* Tue Jul 2 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.0-5
 - Do not install slurm implementation of libpmi/pmi2 libraries
 - in favor of the faster implementation provided by pmix
 - Remove pmi environment module formerly used to select the slurm
 - vs pmix implementations of libpmi/pmi2
 
-* Wed Jun 19 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-2
+* Wed Jun 19 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.0-4
 - Correct the configure for pmix
 - Correct the slurm_pmix_soname patch
-- Use make_build macro instead of make
-- Use autotools commands instead of rpm macros
 
-* Fri Apr 12 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.7-1
+* Wed Jun 19 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.0-3
+- Stop using autotools macros that were removed from rpm
+
+* Sun Jun 9 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.0-2
+- Exclude upstream-deprecated 32-bit architectures
+
+* Sun Jun 9 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.0-1
+- Release of 19.05.0
+- Added nss_plugin subpackage for optional nss plugin
+- Added patch to fix 19.05.0 testsuite
+- Adjusted cray patch to remove all cray, cray_aries plugins
+- Reflect all upstream plugin additions/deletions
+- Remove openssl build dependency
+
+* Thu May 30 2019 Jitka Plesnikova <jplesnik@redhat.com> - 18.08.7-2
+- Perl 5.30 rebuild
+
+* Fri Apr 12 2019 Philip Kovacs <pkfed@fedoraproject.org> - 18.08.7-1
 - Release of 18.08.7
 
 * Sat Mar 16 2019 Orion Poplawski <orion@nwra.com> - 18.08.6-2
 - Rebuild for hdf5 1.10.5
 
-* Thu Mar 7 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.6-1
+* Thu Mar 7 2019 Philip Kovacs <pkfed@fedoraproject.org> - 18.08.6-1
 - Release of 18.08.6
 
 * Sun Feb 17 2019 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 18.08.5-2
 - Rebuild for readline 8.0
 
-* Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 18.08.5-1
+* Thu Jan 31 2019 Philip Kovacs <pkfed@fedoraproject.org> - 18.08.5-1
 - Release of 18.08.5
 
-* Thu Jan 31 2019 Philip Kovacs <pkdevel@yahoo.com> - 17.11.13-2
+* Thu Jan 31 2019 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.13-2
 - Fix build issue on 32-bit architectures
 
-* Wed Jan 30 2019 Philip Kovacs <pkdevel@yahoo.com> - 17.11.13-1
+* Wed Jan 30 2019 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.13-1
 - Release of 17.11.13
 - Closes security issue CVE-2019-6438
 
-* Wed Oct 24 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.12-1
+* Wed Oct 24 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.12-1
 - Release of 17.11.12
 
-* Sat Oct 20 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.11-1
+* Sat Oct 20 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.11-1
 - Release of 17.11.11
 
 * Thu Oct 11 2018 Yu Watanabe <watanabe.yu@gmail.com> - 17.11.10-1
 - Release of 17.11.10
 
-* Fri Sep 28 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.9-2
+* Fri Sep 28 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.9-2
 - Release of 17.11.9-2 (new upstream tarball)
 
-* Fri Aug 10 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.9-1
+* Fri Aug 10 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.9-1
 - Release of 17.11.9
 
-* Fri Jul 20 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.8-1
+* Fri Jul 20 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.8-1
 - Release of 17.11.8
 
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 17.11.7-3
@@ -766,11 +787,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 * Wed Jun 27 2018 Jitka Plesnikova <jplesnik@redhat.com> - 17.11.7-2
 - Perl 5.28 rebuild
 
-* Fri Jun 1 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.7-1
+* Fri Jun 1 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.7-1
 - Release of 17.11.7
 - Closes security issue CVE-2018-10995
 
-* Sat May 12 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.6-1
+* Sat May 12 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.6-1
 - Release of 17.11.6
 - Added patch to avoid building contribs/cray (Yu Watanabe)
 - Added lz4 support via new BuildRequires (Yu Watanabe)
@@ -778,23 +799,23 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
   with rdma-core-devel (Yu Watanabe)
 - Updated package descriptions (Yu Watanabe)
 
-* Fri Mar 16 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.5-1
+* Fri Mar 16 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.5-1
 - Release of 17.11.5
 - Closes security issue CVE-2018-7033
 
-* Sat Mar 3 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.4-1
+* Sat Mar 3 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.4-1
 - Release of 17.11.4
 - Add perl-devel, python3 to build requirements
 - Add patch to convert python references to python3
 - Use LDFLAGS to disable -z now instaed of _hardened_ldflags
 
-* Thu Feb 15 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.3-3
+* Thu Feb 15 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.3-3
 - Add perl-interpreter to BuildRequires
 
-* Thu Feb 15 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.3-2
+* Thu Feb 15 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.3-2
 - Rebuild for libevent soname bump
 
-* Sat Feb 10 2018 Philip Kovacs <pkdevel@yahoo.com> - 17.11.3-1
+* Sat Feb 10 2018 Philip Kovacs <pkfed@fedoraproject.org> - 17.11.3-1
 - Release of 17.11 series
 - Re-aligned rpm packaging to be closer to upstream
 - Enabled new slurm native X11 support using ssh2
@@ -808,7 +829,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 17.02.9-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
-* Thu Nov 16 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.9-3
+* Thu Nov 16 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.9-3
 - Added patch to enable full relro builds and operation
 - Added patch to link knl_generic plugin to libnuma if available
 - Remove the following cray or bluegene-only plugins
@@ -816,27 +837,27 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 - Rename slurm_setuser to slurm-setuser
 - Minor corrections to slurm.conf
 
-* Wed Nov 1 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.9-2
+* Wed Nov 1 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.9-2
 - Correct desktop categories for rpmgrill.desktop-lint
 
-* Wed Nov 1 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.9-1
+* Wed Nov 1 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.9-1
 - Version bump to close CVE-2017-15566
 - Adjusted patches per closure of upstream bug #3942
 - Added desktop categories per rpmgrill.desktop-lint
 
-* Wed Oct 25 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.8-1
+* Wed Oct 25 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.8-1
 - Version bump, patches adjusted
 
-* Thu Oct 5 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.7-4
+* Thu Oct 5 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.7-4
 - Patch changes per resolution of upstream bug #4101:
 - salloc/sbatch/srun: must be root to use --uid/--gid options
 - salloc: supplemental groups dropped after setuid
 
-* Thu Oct 5 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.7-3
+* Thu Oct 5 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.7-3
 - Added BuildRequires gcc and minor packaging conformance items
 
-* Sat Sep 16 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.7-2
+* Sat Sep 16 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.7-2
 - Removed unneeded Requires(pre)
 
-* Thu Sep 14 2017 Philip Kovacs <pkdevel@yahoo.com> - 17.02.7-1
+* Thu Sep 14 2017 Philip Kovacs <pkfed@fedoraproject.org> - 17.02.7-1
 - Packaging for Fedora
