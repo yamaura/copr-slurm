@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        19.05.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -236,6 +236,8 @@ cp %SOURCE5 extras/%{name}-setuser.in
 aclocal -I auxdir
 autoconf
 automake --no-force
+# use -fcommon for gcc 10 to avoid multiple definition errors
+export CFLAGS="%{build_cflags} -fcommon"
 # use -z lazy to allow dlopen with unresolved symbols
 export LDFLAGS="%{build_ldflags} -Wl,-z,lazy"
 %configure \
@@ -692,6 +694,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Jan 22 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.5-2
+- Use cflag -fcommon to allow for building with gcc 10
+
 * Mon Dec 23 2019 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.5-1
 - Release of 19.05.5
 - Closes security issues CVE-2019-19727, CVE-2019-19728
