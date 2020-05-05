@@ -18,33 +18,3 @@ index b92aabc731..970c5b4802 100644
  #
  # (c) Copyright 2013 Cray Inc.  All Rights Reserved.
  #
-diff --git a/doc/html/shtml2html.py b/doc/html/shtml2html.py
-index 0b03182b80..43954a37a9 100755
---- a/doc/html/shtml2html.py
-+++ b/doc/html/shtml2html.py
-@@ -1,4 +1,4 @@
--#!/usr/bin/env python
-+#!/usr/bin/env python3
- 
- import re
- import sys
-diff --git a/doc/man/man2html.py b/doc/man/man2html.py
-index 54909096b9..93433d6fa3 100755
---- a/doc/man/man2html.py
-+++ b/doc/man/man2html.py
-@@ -1,4 +1,4 @@
--#!/usr/bin/env python
-+#!/usr/bin/env python3
- 
- import re
- import sys
-diff --git a/testsuite/expect/regression.py b/testsuite/expect/regression.py
-index 938aecc154..ea64c7cce0 100755
---- a/testsuite/expect/regression.py
-+++ b/testsuite/expect/regression.py
-@@ -1,4 +1,4 @@
--#!/usr/bin/env python
-+#!/usr/bin/env python3
- ############################################################################
- # Copyright (C) 2006 The Regents of the University of California.
- # Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).

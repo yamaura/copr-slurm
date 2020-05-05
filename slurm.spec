@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        19.05.6
+Version:        20.02.2
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -64,7 +64,6 @@ BuildRequires:  libssh2-devel
 BuildRequires:  lz4-devel
 BuildRequires:  mariadb-devel
 BuildRequires:  munge-devel
-BuildRequires:  ncurses-devel
 BuildRequires:  numactl-devel
 BuildRequires:  pam-devel
 BuildRequires:  pmix-devel
@@ -115,8 +114,8 @@ html-based configuration tools for Slurm.
 Summary: Slurm gui and visual tools
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %description gui
-This package contains the Slurm visual tools smap and sview
-and their respective man pages.
+This package contains the Slurm visual tool sview and
+its respective man pages.
 
 %package libs
 Summary: Slurm shared libraries
@@ -415,8 +414,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/acct_gather_profile_{hdf5,influxdb,none}.so
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
-%{_libdir}/%{name}/checkpoint_{none,ompi}.so
-%{_libdir}/%{name}/cli_filter_none.so
+%{_libdir}/%{name}/cli_filter_{lua,none,syslog,user_defaults}.so
 %{_libdir}/%{name}/core_spec_none.so
 %{_libdir}/%{name}/cred_{munge,none}.so
 %{_libdir}/%{name}/ext_sensors_none.so
@@ -428,7 +426,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/job_submit_require_timelimit.so
 %{_libdir}/%{name}/job_submit_throttle.so
 %{_libdir}/%{name}/jobacct_gather_{cgroup,linux,none}.so
-%{_libdir}/%{name}/jobcomp_{elasticsearch,filetxt,mysql,none,script}.so
+%{_libdir}/%{name}/jobcomp_{elasticsearch,filetxt,lua,mysql,none,script}.so
 %{_libdir}/%{name}/launch_slurm.so
 %{_libdir}/%{name}/layouts_power_{cpufreq,default}.so
 %{_libdir}/%{name}/layouts_unit_default.so
@@ -437,6 +435,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/node_features_knl_generic.so
 %{_libdir}/%{name}/power_none.so
 %{_libdir}/%{name}/preempt_{job_prio,none,partition_prio,qos}.so
+%{_libdir}/%{name}/prep_script.so
 %{_libdir}/%{name}/priority_{basic,multifactor}.so
 %{_libdir}/%{name}/proctrack_{cgroup,linuxproc,lua,pgid}.so
 %{_libdir}/%{name}/route_{default,topology}.so
@@ -460,6 +459,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man5/nonstop.conf.5*
 %{_mandir}/man5/slurm.conf.5*
 %{_mandir}/man5/topology.conf.5*
+%{_mandir}/man8/slurmrestd.8*
 %{_mandir}/man8/spank.8*
 %{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/%{name}/cgroup*.conf.example
@@ -500,11 +500,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 # ---------
 
 %files gui
-%{_bindir}/smap
 %{_bindir}/sview
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
-%{_mandir}/man1/smap.1*
 %{_mandir}/man1/sview.1*
 
 # ----------
@@ -694,6 +692,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue May 5 2020 Philip Kovacs <pkfed@fedoraproject.org> - 20.02.2-1
+- Release of 20.02.2
+
 * Mon Mar 30 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.6-1
 - Release of 19.05.6
 

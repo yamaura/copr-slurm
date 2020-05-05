@@ -9,14 +9,17 @@ index da96aa070d..2a2d1f2c82 100644
  EXTRA_DIST = \
  	make-3.81.slurm.patch	\
 diff --git a/src/plugins/acct_gather_energy/Makefile.am b/src/plugins/acct_gather_energy/Makefile.am
-index 50c4fd36a2..c826387219 100644
+index 937808035f..2abce6efdc 100644
 --- a/src/plugins/acct_gather_energy/Makefile.am
 +++ b/src/plugins/acct_gather_energy/Makefile.am
-@@ -1,3 +1,3 @@
+@@ -1,6 +1,6 @@
  # Makefile for accounting gather energy plugins
  
 -SUBDIRS = cray_aries rapl ibmaem ipmi none xcc
 +SUBDIRS = rapl ibmaem ipmi none xcc
+ 
+ if BUILD_RSMI
+ SUBDIRS += rsmi
 diff --git a/src/plugins/core_spec/Makefile.am b/src/plugins/core_spec/Makefile.am
 index 44b1ed67c0..f06bc541d7 100644
 --- a/src/plugins/core_spec/Makefile.am
@@ -47,6 +50,18 @@ index e393bcfb1c..b98cf2e000 100644
  	defaults \
  	logging \
  	lua \
+diff --git a/src/plugins/mpi/Makefile.am b/src/plugins/mpi/Makefile.am
+index 4d055e2030..1a44dfb2ab 100644
+--- a/src/plugins/mpi/Makefile.am
++++ b/src/plugins/mpi/Makefile.am
+@@ -1,6 +1,6 @@
+ # Makefile for mpi plugins
+
+-SUBDIRS = cray_shasta none pmi2
++SUBDIRS = none pmi2
+ if HAVE_PMIX
+ SUBDIRS += pmix
+ endif
 diff --git a/src/plugins/node_features/Makefile.am b/src/plugins/node_features/Makefile.am
 index f5ef036303..d955c51ba1 100644
 --- a/src/plugins/node_features/Makefile.am
@@ -66,16 +81,16 @@ index ccde44c322..c6171740c1 100644
 -SUBDIRS = common cray_aries none
 +SUBDIRS = common none
 diff --git a/src/plugins/select/Makefile.am b/src/plugins/select/Makefile.am
-index 09fdfd2313..570af23c4a 100644
+index 74606481ff..bebf728529 100644
 --- a/src/plugins/select/Makefile.am
 +++ b/src/plugins/select/Makefile.am
 @@ -1,7 +1,7 @@
  # Makefile for node selection plugins
- 
+
  # NOTE: other must be in the list before cray_aries lest the build break
--SUBDIRS = other cons_res cons_tres cray_aries linear
-+SUBDIRS = other cons_res cons_tres linear
- 
+-SUBDIRS = other cons_common cons_res cons_tres cray_aries linear
++SUBDIRS = other cons_common cons_res cons_tres linear
+
  # Each plugin here needs a plugin_id, here are the currect plug_ids
  # for each plugin.
 diff --git a/src/plugins/switch/Makefile.am b/src/plugins/switch/Makefile.am
