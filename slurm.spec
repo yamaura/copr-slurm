@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        20.02.2
+Version:        20.02.3
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -692,6 +692,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon May 25 2020 Philip Kovacs <pkfed@fedoraproject.org> - 20.02.3-1
+- Release of 20.02.3
+
 * Tue May 5 2020 Philip Kovacs <pkfed@fedoraproject.org> - 20.02.2-1
 - Release of 20.02.2
 
