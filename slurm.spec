@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        20.02.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -692,6 +692,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Jun 25 2020 Orion Poplawski <orion@cora.nwra.com> - 20.02.3-3
+- Rebuild for hdf5 1.10.6
+
 * Mon Jun 22 2020 Jitka Plesnikova <jplesnik@redhat.com> - 20.02.3-2
 - Perl 5.32 rebuild
 
