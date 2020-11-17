@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        19.05.7
+Version:        19.05.8
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -694,6 +694,10 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon May 25 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.8-1
+- Release of 19.05.8
+- Closes security issues CVE-2020-27745 and CVE-2020-27746
+
 * Mon May 25 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.7-1
 - Release of 19.05.7
 
