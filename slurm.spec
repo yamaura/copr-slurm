@@ -694,7 +694,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
-* Mon May 25 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.8-1
+* Tue Nov 17 2020 Philip Kovacs <pkfed@fedoraproject.org> - 19.05.8-1
 - Release of 19.05.8
 - Closes security issues CVE-2020-27745 and CVE-2020-27746
 
