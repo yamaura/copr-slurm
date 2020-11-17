@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.02.3
-Release:        5%{?dist}
+Version:        20.02.6
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -692,6 +692,10 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue Nov 17 2020 Philip Kovacs <pkfed@fedoraproject.org> - 20.02.6-1
+- Release of 20.02.6
+- Closes security issues CVE-2020-27745 and CVE-2020-27746
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 20.02.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 

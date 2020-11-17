@@ -91,8 +91,8 @@ index 74606481ff..bebf728529 100644
 -SUBDIRS = other cons_common cons_res cons_tres cray_aries linear
 +SUBDIRS = other cons_common cons_res cons_tres linear
 
- # Each plugin here needs a plugin_id, here are the currect plug_ids
- # for each plugin.
+ # Each plugin here needs a plugin_id.
+ # Here are the current plugin_ids for each plugin.
 diff --git a/src/plugins/switch/Makefile.am b/src/plugins/switch/Makefile.am
 index c58f51329d..39a2b3eb7f 100644
 --- a/src/plugins/switch/Makefile.am
