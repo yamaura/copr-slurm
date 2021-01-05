@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        20.02.6
+Version:        20.11.2
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -37,8 +37,7 @@ Patch12:        slurm_without_cray.patch
 
 # Fedora-related patches
 Patch20:        slurm_pmix_soname.patch
-Patch21:        slurm_service_files.patch
-Patch22:        slurm_to_python3.patch
+Patch21:        slurm_to_python3.patch
 
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -287,18 +286,11 @@ s|^dir_tmpfiles_d=.*|dir_tmpfiles_d="%{_tmpfilesdir}"|g;' \
 %make_build DESTDIR=%{buildroot} install-contrib
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}
-install -d -m 0755 %{buildroot}%{_sysconfdir}/%{name}/layouts.d
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0644 -p etc/cgroup.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/cgroup.conf.example \
     %{buildroot}%{_sysconfdir}/%{name}/cgroup.conf
-install -m 0644 -p etc/layouts.d.power.conf.example \
-    %{buildroot}%{_sysconfdir}/%{name}/layouts.d/power.conf.example
-install -m 0644 -p etc/layouts.d.power_cpufreq.conf.example \
-    %{buildroot}%{_sysconfdir}/%{name}/layouts.d/power_cpufreq.conf.example
-install -m 0644 -p etc/layouts.d.unit.conf.example \
-    %{buildroot}%{_sysconfdir}/%{name}/layouts.d/unit.conf.example
 install -m 0644 -p etc/slurm.conf %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurm.conf.example %{buildroot}%{_sysconfdir}/%{name}
 install -m 0600 -p etc/slurmdbd.conf %{buildroot}%{_sysconfdir}/%{name}
@@ -368,8 +360,9 @@ install -m 0644 contribs/lua/*.lua %{buildroot}%{_docdir}/%{name}/contribs/lua
 
 # remove libtool archives
 find %{buildroot} -name \*.a -o -name \*.la | xargs rm -f
-# remove libslurmfull symlink (non-development, internal library)
+# remove libslurmfull, libslurm_pmi symlinks (non-development, internal libraries)
 rm -rf %{buildroot}%{_libdir}/libslurmfull.so
+rm -rf %{buildroot}%{_libdir}/libslurm_pmi.so
 # remove auth_none plugin
 rm -f %{buildroot}%{_libdir}/%{name}/auth_none.so
 # remove example plugins
@@ -396,7 +389,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_libdir}/%{name}
 %dir %{_rundir}/%{name}
 %dir %{_sysconfdir}/%{name}
-%dir %{_sysconfdir}/%{name}/layouts.d
 %dir %{_var}/log/%{name}
 %dir %{_var}/spool/%{name}
 %dir %{_var}/spool/%{name}/ctld
@@ -404,11 +396,11 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
 %{_bindir}/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}
-%{_bindir}/{scancel,scontrol,sdiag,sh5util,sinfo,sprio}
+%{_bindir}/{scancel,scontrol,scrontab,sdiag,sh5util,sinfo,sprio}
 %{_bindir}/{squeue,sreport,srun,sshare,sstat,strigger}
 %{_bindir}/%{name}-setuser
 %{_libdir}/%{name}/accounting_storage_{filetxt,none,slurmdbd}.so
-%{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,rapl,xcc}.so
+%{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,pm_counters,rapl,xcc}.so
 %{_libdir}/%{name}/acct_gather_filesystem_{lustre,none}.so
 %{_libdir}/%{name}/acct_gather_interconnect_{none,ofed}.so
 %{_libdir}/%{name}/acct_gather_profile_{hdf5,influxdb,none}.so
@@ -420,7 +412,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/ext_sensors_none.so
 %{_libdir}/%{name}/gres_{gpu,mic,mps,nic}.so
 %{_libdir}/%{name}/gpu_generic.so
-%{_libdir}/%{name}/job_container_none.so
+%{_libdir}/%{name}/job_container_{cncu,none}.so
 %{_libdir}/%{name}/job_submit_all_partitions.so
 %{_libdir}/%{name}/job_submit_lua.so
 %{_libdir}/%{name}/job_submit_require_timelimit.so
@@ -428,8 +420,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/jobacct_gather_{cgroup,linux,none}.so
 %{_libdir}/%{name}/jobcomp_{elasticsearch,filetxt,lua,mysql,none,script}.so
 %{_libdir}/%{name}/launch_slurm.so
-%{_libdir}/%{name}/layouts_power_{cpufreq,default}.so
-%{_libdir}/%{name}/layouts_unit_default.so
 %{_libdir}/%{name}/mcs_{account,group,none,user}.so
 %{_libdir}/%{name}/mpi_{none,openmpi,pmi2,pmix*}.so
 %{_libdir}/%{name}/node_features_knl_generic.so
@@ -447,7 +437,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/task_{affinity,cgroup,none}.so
 %{_libdir}/%{name}/topology_{3d_torus,hypercube,node_rank,none,tree}.so
 %{_mandir}/man1/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}.1*
-%{_mandir}/man1/{scancel,scontrol,sdiag,sh5util,sinfo,sprio}.1*
+%{_mandir}/man1/{scancel,scontrol,scrontab,sdiag,sh5util,sinfo,sprio}.1*
 %{_mandir}/man1/{squeue,sreport,srun,sshare,sstat,strigger}.1*
 %{_mandir}/man1/slurm.1*
 %{_mandir}/man5/acct_gather.conf.5*
@@ -463,7 +453,6 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man8/spank.8*
 %{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/%{name}/cgroup*.conf.example
-%{_sysconfdir}/%{name}/layouts.d/*.example
 %{_sysconfdir}/%{name}/slurm.conf.example
 %{_tmpfilesdir}/slurm.conf
 
@@ -512,6 +501,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %files libs
 %{_libdir}/libslurm.so.*
 %{_libdir}/libslurmfull-*.so
+%{_libdir}/libslurm_pmi-*.so
 
 # ---------
 # Slurm-pmi
@@ -692,6 +682,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue Jan 5 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-1
+- Release of 20.11.2
+
 * Tue Nov 17 2020 Philip Kovacs <pkfed@fedoraproject.org> - 20.02.6-1
 - Release of 20.02.6
 - Closes security issues CVE-2020-27745 and CVE-2020-27746
