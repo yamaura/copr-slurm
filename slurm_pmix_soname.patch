@@ -1,0 +1,35 @@
+diff --git a/src/plugins/mpi/pmix/mpi_pmix.c b/src/plugins/mpi/pmix/mpi_pmix.c
+index 1bf287ff44..8702a2bd17 100644
+--- a/src/plugins/mpi/pmix/mpi_pmix.c
++++ b/src/plugins/mpi/pmix/mpi_pmix.c
+@@ -109,7 +109,7 @@ static void *_libpmix_open(void)
+ #elif defined PMIXP_V3_LIBPATH
+ 	xstrfmtcat(full_path, "%s/", PMIXP_V3_LIBPATH);
+ #endif
+-	xstrfmtcat(full_path, "libpmix.so");
++	xstrfmtcat(full_path, "libpmix.so.2");
+ 
+ 	lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
+ 	xfree(full_path);
+diff --git a/src/plugins/mpi/pmix/pmixp_dconn_ucx.c b/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
+index f6c91adc93..6021faa01e 100644
+--- a/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
++++ b/src/plugins/mpi/pmix/pmixp_dconn_ucx.c
+@@ -167,7 +167,7 @@ static int _load_ucx_lib()
+ 	 * we have from autoconf
+ 	 */
+ 	char *full_path = NULL;
+-	xstrfmtcat(full_path, "%s/libucp.so", PMIXP_UCX_LIBPATH);
++	xstrfmtcat(full_path, "%s/libucp.so.0", PMIXP_UCX_LIBPATH);
+ 	_ucx_lib_handler = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
+ 	xfree(full_path);
+ 	if (_ucx_lib_handler) {
+@@ -178,7 +178,7 @@ static int _load_ucx_lib()
+ 	 * known by dynamic linker.
+ 	 */
+ #endif
+-	_ucx_lib_handler = dlopen("libucp.so", RTLD_LAZY | RTLD_GLOBAL);
++	_ucx_lib_handler = dlopen("libucp.so.0", RTLD_LAZY | RTLD_GLOBAL);
+ 	if (!_ucx_lib_handler) {
+ 		char *err = dlerror();
+ 		PMIXP_ERROR("Cannot open UCX lib: %s", (err) ? err : "unknown");
