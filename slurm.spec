@@ -20,15 +20,16 @@ Source3:        slurm-sview.desktop
 Source4:        slurm-128x128.png
 Source5:        slurm-setuser.in
 
-# Upstream bug #4449: release-style versioning of libslurmfull
-Patch0:         slurm_libslurmfull_version.patch
+# Release-style versioning of libslurmfull/libslurm_pmi
+Patch0:         slurm_release_version.patch
 
 # Build-related patches
 Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
 Patch12:        slurm_without_cray.patch
+Patch13:        slurm_check_version.patch
 
-# Fedora-related patches
+# Other patches
 Patch20:        slurm_pmix_soname.patch
 Patch21:        slurm_to_python3.patch
 
@@ -378,62 +379,12 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_var}/spool/%{name}/d
 %config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
-%{_bindir}/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}
-%{_bindir}/{scancel,scontrol,scrontab,sdiag,sh5util,sinfo,sprio}
-%{_bindir}/{squeue,sreport,srun,sshare,sstat,strigger}
+%{_bindir}/s*
 %{_bindir}/%{name}-setuser
-%{_libdir}/%{name}/accounting_storage_{filetxt,none,slurmdbd}.so
-%{_libdir}/%{name}/acct_gather_energy_{ibmaem,ipmi,none,pm_counters,rapl,xcc}.so
-%{_libdir}/%{name}/acct_gather_filesystem_{lustre,none}.so
-%{_libdir}/%{name}/acct_gather_interconnect_{none,ofed}.so
-%{_libdir}/%{name}/acct_gather_profile_{hdf5,influxdb,none}.so
-%{_libdir}/%{name}/auth_munge.so
-%{_libdir}/%{name}/burst_buffer_generic.so
-%{_libdir}/%{name}/cli_filter_{lua,none,syslog,user_defaults}.so
-%{_libdir}/%{name}/core_spec_none.so
-%{_libdir}/%{name}/cred_{munge,none}.so
-%{_libdir}/%{name}/ext_sensors_none.so
-%{_libdir}/%{name}/gres_{gpu,mic,mps,nic}.so
-%{_libdir}/%{name}/gpu_generic.so
-%{_libdir}/%{name}/job_container_{cncu,none}.so
-%{_libdir}/%{name}/job_submit_all_partitions.so
-%{_libdir}/%{name}/job_submit_lua.so
-%{_libdir}/%{name}/job_submit_require_timelimit.so
-%{_libdir}/%{name}/job_submit_throttle.so
-%{_libdir}/%{name}/jobacct_gather_{cgroup,linux,none}.so
-%{_libdir}/%{name}/jobcomp_{elasticsearch,filetxt,lua,mysql,none,script}.so
-%{_libdir}/%{name}/launch_slurm.so
-%{_libdir}/%{name}/mcs_{account,group,none,user}.so
-%{_libdir}/%{name}/mpi_{none,openmpi,pmi2,pmix*}.so
-%{_libdir}/%{name}/node_features_knl_generic.so
-%{_libdir}/%{name}/power_none.so
-%{_libdir}/%{name}/preempt_{job_prio,none,partition_prio,qos}.so
-%{_libdir}/%{name}/prep_script.so
-%{_libdir}/%{name}/priority_{basic,multifactor}.so
-%{_libdir}/%{name}/proctrack_{cgroup,linuxproc,lua,pgid}.so
-%{_libdir}/%{name}/route_{default,topology}.so
-%{_libdir}/%{name}/sched_{backfill,builtin,hold}.so
-%{_libdir}/%{name}/select_{cons_res,cons_tres,linear,serial}.so
-%{_libdir}/%{name}/site_factor_none.so
-%{_libdir}/%{name}/slurmctld_nonstop.so
-%{_libdir}/%{name}/switch_{generic,none}.so
-%{_libdir}/%{name}/task_{affinity,cgroup,none}.so
-%{_libdir}/%{name}/topology_{3d_torus,hypercube,node_rank,none,tree}.so
-%{_mandir}/man1/{sacct,sacctmgr,salloc,sattach,sbatch,sbcast}.1*
-%{_mandir}/man1/{scancel,scontrol,scrontab,sdiag,sh5util,sinfo,sprio}.1*
-%{_mandir}/man1/{squeue,sreport,srun,sshare,sstat,strigger}.1*
-%{_mandir}/man1/slurm.1*
-%{_mandir}/man5/acct_gather.conf.5*
-%{_mandir}/man5/burst_buffer.conf.5*
-%{_mandir}/man5/cgroup.conf.5*
-%{_mandir}/man5/ext_sensors.conf.5*
-%{_mandir}/man5/gres.conf.5*
-%{_mandir}/man5/knl.conf.5*
-%{_mandir}/man5/nonstop.conf.5*
-%{_mandir}/man5/slurm.conf.5*
-%{_mandir}/man5/topology.conf.5*
-%{_mandir}/man8/slurmrestd.8*
-%{_mandir}/man8/spank.8*
+%{_libdir}/%{name}/*.so
+%{_mandir}/man1/*.1*
+%{_mandir}/man5/*.5*
+%{_mandir}/man8/*.8*
 %{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/%{name}/cgroup*.conf.example
 %{_sysconfdir}/%{name}/slurm.conf.example
@@ -453,7 +404,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_includedir}/%{name}/slurmdb.h
 %{_includedir}/%{name}/smd_ns.h
 %{_includedir}/%{name}/spank.h
-%{_libdir}/lib{slurm,slurmdb}.so
+%{_libdir}/libslurm*.so
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
 %{_mandir}/man3/*.3.*
