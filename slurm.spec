@@ -9,7 +9,7 @@
 
 Name:           slurm
 Version:        20.11.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -379,12 +379,88 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %dir %{_var}/spool/%{name}/d
 %config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
-%{_bindir}/s*
+%{_bindir}/sacct
+%{_bindir}/sacctmgr
+%{_bindir}/salloc
+%{_bindir}/sattach
+%{_bindir}/sbatch
+%{_bindir}/sbcast
+%{_bindir}/scancel
+%{_bindir}/scontrol
+%{_bindir}/scrontab
+%{_bindir}/sdiag
+%{_bindir}/sh5util
+%{_bindir}/sinfo
+%{_bindir}/sprio
+%{_bindir}/squeue
+%{_bindir}/sreport
+%{_bindir}/srun
+%{_bindir}/sshare
+%{_bindir}/sstat
+%{_bindir}/strigger
 %{_bindir}/%{name}-setuser
-%{_libdir}/%{name}/*.so
-%{_mandir}/man1/*.1*
-%{_mandir}/man5/*.5*
-%{_mandir}/man8/*.8*
+%{_libdir}/%{name}/accounting_storage_*.so
+%{_libdir}/%{name}/acct_gather_*.so
+%{_libdir}/%{name}/auth_munge.so
+%{_libdir}/%{name}/burst_buffer_generic.so
+%{_libdir}/%{name}/cli_filter_*.so
+%{_libdir}/%{name}/core_spec_none.so
+%{_libdir}/%{name}/cred_*.so
+%{_libdir}/%{name}/ext_sensors_none.so
+%{_libdir}/%{name}/gres_*.so
+%{_libdir}/%{name}/gpu_generic.so
+%{_libdir}/%{name}/job_container_*.so
+%{_libdir}/%{name}/job_submit_*.so
+%{_libdir}/%{name}/jobacct_gather_*.so
+%{_libdir}/%{name}/jobcomp_*.so
+%{_libdir}/%{name}/launch_slurm.so
+%{_libdir}/%{name}/mcs_*.so
+%{_libdir}/%{name}/mpi_*.so
+%{_libdir}/%{name}/node_features_knl_generic.so
+%{_libdir}/%{name}/power_none.so
+%{_libdir}/%{name}/preempt_*.so
+%{_libdir}/%{name}/prep_script.so
+%{_libdir}/%{name}/priority_*.so
+%{_libdir}/%{name}/proctrack_*.so
+%{_libdir}/%{name}/route_*.so
+%{_libdir}/%{name}/sched_*.so
+%{_libdir}/%{name}/select_*.so
+%{_libdir}/%{name}/site_factor_none.so
+%{_libdir}/%{name}/slurmctld_nonstop.so
+%{_libdir}/%{name}/switch_*.so
+%{_libdir}/%{name}/task_*.so
+%{_libdir}/%{name}/topology_*.so
+%{_mandir}/man1/sacct.1*
+%{_mandir}/man1/sacctmgr.1*
+%{_mandir}/man1/salloc.1*
+%{_mandir}/man1/sattach.1*
+%{_mandir}/man1/sbatch.1*
+%{_mandir}/man1/sbcast.1*
+%{_mandir}/man1/scancel.1*
+%{_mandir}/man1/scontrol.1*
+%{_mandir}/man1/scrontab.1*
+%{_mandir}/man1/sdiag.1*
+%{_mandir}/man1/sh5util.1*
+%{_mandir}/man1/sinfo.1*
+%{_mandir}/man1/slurm.1*
+%{_mandir}/man1/sprio.1*
+%{_mandir}/man1/squeue.1*
+%{_mandir}/man1/sreport.1*
+%{_mandir}/man1/srun.1*
+%{_mandir}/man1/sshare.1*
+%{_mandir}/man1/sstat.1*
+%{_mandir}/man1/strigger.1*
+%{_mandir}/man5/acct_gather.conf.5*
+%{_mandir}/man5/burst_buffer.conf.5*
+%{_mandir}/man5/cgroup.conf.5*
+%{_mandir}/man5/ext_sensors.conf.5*
+%{_mandir}/man5/gres.conf.5*
+%{_mandir}/man5/knl.conf.5*
+%{_mandir}/man5/nonstop.conf.5*
+%{_mandir}/man5/slurm.conf.5*
+%{_mandir}/man5/topology.conf.5*
+%{_mandir}/man8/slurmrestd.8*
+%{_mandir}/man8/spank.8*
 %{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/%{name}/cgroup*.conf.example
 %{_sysconfdir}/%{name}/slurm.conf.example
@@ -404,7 +480,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_includedir}/%{name}/slurmdb.h
 %{_includedir}/%{name}/smd_ns.h
 %{_includedir}/%{name}/spank.h
-%{_libdir}/libslurm*.so
+%{_libdir}/libslurm.so
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
 %{_mandir}/man3/*.3.*
@@ -628,6 +704,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Jan 6 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-2
+- Add to EPEL7
+
 * Tue Jan 5 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-1
 - Release of 20.11.2
 
