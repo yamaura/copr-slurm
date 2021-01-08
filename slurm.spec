@@ -40,6 +40,7 @@ Patch13:        slurm_check_version.patch
 Patch20:        slurm_pmix_soname.patch
 Patch21:        slurm_to_python3.patch
 
+BuildRequires: make
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  desktop-file-utils
