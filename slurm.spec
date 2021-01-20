@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.2
-Release:        2%{?dist}
+Version:        20.11.3
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -40,11 +40,11 @@ Patch13:        slurm_check_version.patch
 Patch20:        slurm_pmix_soname.patch
 Patch21:        slurm_to_python3.patch
 
-BuildRequires: make
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  desktop-file-utils
 BuildRequires:  gcc
+BuildRequires:  make
 BuildRequires:  perl-devel
 BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
@@ -710,6 +710,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue Jan 19 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.3-1
+- Release of 20.11.3
+
 * Wed Jan 6 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-2
 - Minor spec adjustments
 
