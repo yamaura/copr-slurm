@@ -8,8 +8,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.2
-Release:        2%{?dist}
+Version:        20.11.5
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -455,6 +455,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_mandir}/man5/cgroup.conf.5*
 %{_mandir}/man5/ext_sensors.conf.5*
 %{_mandir}/man5/gres.conf.5*
+%{_mandir}/man5/job_container.conf.5*
 %{_mandir}/man5/knl.conf.5*
 %{_mandir}/man5/nonstop.conf.5*
 %{_mandir}/man5/slurm.conf.5*
@@ -692,6 +693,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu Apr 1 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-1
+- Release of 20.11.5
+
 * Wed Jan 6 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-2
 - Add to EPEL8
 
