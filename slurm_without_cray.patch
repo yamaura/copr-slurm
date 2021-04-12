@@ -5,6 +5,17 @@ index 3f6fac0a85..6c466b4eb5 100644
 @@ -1 +1 @@
 -SUBDIRS = cray lua mic nss_slurm openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
 +SUBDIRS = lua mic nss_slurm openlava pam pam_slurm_adopt perlapi pmi pmi2 seff sgather sgi sjobexit torque
+diff --git a/src/plugins/burst_buffer/Makefile.am b/src/plugins/burst_buffer/Makefile.am
+index c187bb83bd..aabd7f3fe8 100644
+--- a/src/plugins/burst_buffer/Makefile.am
++++ b/src/plugins/burst_buffer/Makefile.am
+@@ -2,6 +2,3 @@
+ 
+ SUBDIRS = generic
+ 
+-if WITH_JSON_PARSER
+-SUBDIRS += datawarp
+-endif
 diff --git a/src/plugins/core_spec/Makefile.am b/src/plugins/core_spec/Makefile.am
 index 44b1ed67c0..f06bc541d7 100644
 --- a/src/plugins/core_spec/Makefile.am

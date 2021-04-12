@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        20.11.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -75,6 +75,14 @@ BuildRequires:  zlib-devel
 
 %if %{with ucx}
 BuildRequires:  ucx-devel
+%endif
+
+# create slurm-slurmrestd package for Fedora >= 34
+%if 0%{fedora} >= 34
+BuildRequires:  http-parser-devel
+BuildRequires:  pkgconfig(json-c)
+BuildRequires:  pkgconfig(libjwt)
+BuildRequires:  pkgconfig(yaml-0.1)
 %endif
 
 # exclude upstream-deprecated 32-bit architectures
@@ -167,6 +175,13 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 %description slurmdbd
 Slurm database daemon. Used to accept and process database RPCs and upload
 database changes to slurmctld daemons on each cluster.
+
+%package slurmrestd
+Summary: Slurm REST API deamon
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%description slurmrestd
+Slurm REST API daemon.  The slurmrestd daemon is designed to allow clients
+to communicate with Slurm via a REST API.
 
 # -----------------
 # Contribs Packages
@@ -300,6 +315,7 @@ install -m 0600 -p etc/slurmdbd.conf.example %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmctld.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmd.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmdbd.service %{buildroot}%{_unitdir}
+install -m 0644 -p etc/slurmrestd.service %{buildroot}%{_unitdir}
 
 # tmpfiles.d file for creating /run/slurm dir after reboot
 install -d -m 0755 %{buildroot}%{_tmpfilesdir}
@@ -556,9 +572,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %files rrdtool
 %{_libdir}/%{name}/ext_sensors_rrd.so
 
-# ---------
-# Slurmctld
-# ---------
+# ---------------
+# Slurm-slurmctld
+# ---------------
 
 %files slurmctld
 %{_mandir}/man8/slurmctld.8*
@@ -566,9 +582,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_unitdir}/slurmctld.service
 %ghost %{_rundir}/%{name}/slurmctld.pid
 
-# ------
-# Slurmd
-# ------
+# ------------
+# Slurm-slurmd
+# ------------
 
 %files slurmd
 %{_mandir}/man8/slurmd.8*
@@ -578,9 +594,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_unitdir}/slurmd.service
 %ghost %{_rundir}/%{name}/slurmd.pid
 
-# --------
-# Slurmdbd
-# --------
+# --------------
+# Slurm-slurmdbd
+# --------------
 
 %files slurmdbd
 %config(noreplace) %{_sysconfdir}/%{name}/slurmdbd.conf
@@ -591,6 +607,20 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_sysconfdir}/%{name}/slurmdbd.conf.example
 %{_unitdir}/slurmdbd.service
 %ghost %{_rundir}/%{name}/slurmdbd.pid
+
+# ----------------
+# Slurm-slurmrestd
+# ----------------
+
+%files slurmrestd
+%{_libdir}/%{name}/auth_jwt.so
+%{_libdir}/%{name}/openapi_dbv0_0_36.so
+%{_libdir}/%{name}/openapi_v0_0_36.so
+%{_libdir}/%{name}/openapi_v0_0_35.so
+%{_libdir}/%{name}/rest_auth_jwt.so
+%{_libdir}/%{name}/rest_auth_local.so
+%{_sbindir}/slurmrestd
+%{_unitdir}/slurmrestd.service
 
 # --------------
 # Slurm-contribs
@@ -711,6 +741,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon Apr 12 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-2
+- Add subpackage slurm-slurmrestd (Slurm REST API daemon)
+
 * Fri Mar 26 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-1
 - Release of 20.11.5
 
