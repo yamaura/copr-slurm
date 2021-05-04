@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.5
-Release:        2%{?dist}
+Version:        20.11.6
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -50,7 +50,11 @@ BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
 BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
+%if !0%{?el7}
 BuildRequires:  pkgconf
+%else
+BuildRequires:  pkgconfig
+%endif
 BuildRequires:  pkgconfig(check)
 BuildRequires:  pkgconfig(lua)
 BuildRequires:  python3
@@ -73,16 +77,16 @@ BuildRequires:  readline-devel
 BuildRequires:  rrdtool-devel
 BuildRequires:  zlib-devel
 
-%if %{with ucx}
+%if 0%{?fedora} && %{with ucx}
 BuildRequires:  ucx-devel
 %endif
 
-# create slurm-slurmrestd package for Fedora >= 34
-%if 0%{fedora} >= 34
+# create slurm-slurmrestd package for Fedora >= 34 and EPEL7/8
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
 BuildRequires:  http-parser-devel
-BuildRequires:  pkgconfig(json-c)
-BuildRequires:  pkgconfig(libjwt)
-BuildRequires:  pkgconfig(yaml-0.1)
+BuildRequires:  json-c-devel
+BuildRequires:  libjwt-devel
+BuildRequires:  libyaml-devel
 %endif
 
 # exclude upstream-deprecated 32-bit architectures
@@ -91,7 +95,7 @@ ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix
-%if %{with ucx}
+%if 0%{?fedora} && %{with ucx}
 Requires:       ucx
 %endif
 %{?systemd_requires}
@@ -176,12 +180,14 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Slurm database daemon. Used to accept and process database RPCs and upload
 database changes to slurmctld daemons on each cluster.
 
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
 %package slurmrestd
 Summary: Slurm REST API deamon
 Requires: %{name}%{?_isa} = %{version}-%{release}
 %description slurmrestd
 Slurm REST API daemon.  The slurmrestd daemon is designed to allow clients
 to communicate with Slurm via a REST API.
+%endif
 
 # -----------------
 # Contribs Packages
@@ -259,7 +265,7 @@ export LDFLAGS="%{build_ldflags} -Wl,-z,lazy"
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
-%if %{with ucx}
+%if 0%{?fedora} && %{with ucx}
   --with-ucx=%{_prefix} \
 %endif
   --enable-shared \
@@ -393,6 +399,10 @@ rm -f %{buildroot}%{_mandir}/man5/cray*
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/.packlist
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/Slurm*.bs
 rm -f %{buildroot}%{perl_archlib}/perllocal.pod
+%if 0%{?fedora} && (0%{?fedora} < 34)
+# remove unused slurmrestd service file
+rm -f %{buildroot}%{_unitdir}/slurmrestd.service
+%endif
 
 %ldconfig_scriptlets devel
 %ldconfig_scriptlets libs
@@ -539,6 +549,20 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_mandir}/man1/sview.1*
 
+%if 0%{?el7}
+%post gui
+/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun gui
+if [ $1 -eq 0 ] ; then
+    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans gui
+/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+%endif
+
 # ----------
 # Slurm-libs
 # ----------
@@ -612,6 +636,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 # Slurm-slurmrestd
 # ----------------
 
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
 %files slurmrestd
 %{_libdir}/%{name}/auth_jwt.so
 %{_libdir}/%{name}/openapi_dbv0_0_36.so
@@ -621,6 +646,7 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_libdir}/%{name}/rest_auth_local.so
 %{_sbindir}/slurmrestd
 %{_unitdir}/slurmrestd.service
+%endif
 
 # --------------
 # Slurm-contribs
@@ -741,6 +767,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue May 4 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.6-1
+- Release of 20.11.6
+
 * Mon Apr 12 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-2
 - Add subpackage slurm-slurmrestd (Slurm REST API daemon)
 
