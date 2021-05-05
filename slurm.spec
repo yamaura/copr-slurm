@@ -7,8 +7,15 @@
 %global name_version %{name}-%{version}-%{ups_rel}
 %endif
 
+# follow arch-inclusions for ucx
+%ifarch aarch64 ppc64le x86_64
+%bcond_without ucx
+%else
+%bcond_with ucx
+%endif
+
 Name:           slurm
-Version:        20.11.5
+Version:        20.11.6
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -37,12 +44,17 @@ BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  desktop-file-utils
 BuildRequires:  gcc
+BuildRequires:  make
 BuildRequires:  perl-devel
 BuildRequires:  perl-ExtUtils-MakeMaker
 BuildRequires:  perl-interpreter
 BuildRequires:  perl-macros
 BuildRequires:  perl-podlators
+%if !0%{?el7}
 BuildRequires:  pkgconf
+%else
+BuildRequires:  pkgconfig
+%endif
 BuildRequires:  pkgconfig(check)
 BuildRequires:  pkgconfig(lua)
 BuildRequires:  python3
@@ -65,12 +77,27 @@ BuildRequires:  readline-devel
 BuildRequires:  rrdtool-devel
 BuildRequires:  zlib-devel
 
+%if 0%{?fedora} && %{with ucx}
+BuildRequires:  ucx-devel
+%endif
+
+# create slurm-slurmrestd package for Fedora >= 34 and EPEL7/8
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+BuildRequires:  http-parser-devel
+BuildRequires:  json-c-devel
+BuildRequires:  libjwt-devel
+BuildRequires:  libyaml-devel
+%endif
+
 # exclude upstream-deprecated 32-bit architectures
 ExcludeArch:    armv7hl
 ExcludeArch:    i686
 
 Requires:       munge
 Requires:       pmix
+%if 0%{?fedora} && %{with ucx}
+Requires:       ucx
+%endif
 %{?systemd_requires}
 
 %description
@@ -153,6 +180,15 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Slurm database daemon. Used to accept and process database RPCs and upload
 database changes to slurmctld daemons on each cluster.
 
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%package slurmrestd
+Summary: Slurm REST API deamon
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%description slurmrestd
+Slurm REST API daemon.  The slurmrestd daemon is designed to allow clients
+to communicate with Slurm via a REST API.
+%endif
+
 # -----------------
 # Contribs Packages
 # -----------------
@@ -229,6 +265,9 @@ export LDFLAGS="%{build_ldflags} -Wl,-z,lazy"
   --prefix=%{_prefix} \
   --sysconfdir=%{_sysconfdir}/%{name} \
   --with-pam_dir=%{_libdir}/security \
+%if 0%{?fedora} && %{with ucx}
+  --with-ucx=%{_prefix} \
+%endif
   --enable-shared \
   --enable-x11 \
   --disable-static \
@@ -282,6 +321,7 @@ install -m 0600 -p etc/slurmdbd.conf.example %{buildroot}%{_sysconfdir}/%{name}
 install -m 0644 -p etc/slurmctld.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmd.service %{buildroot}%{_unitdir}
 install -m 0644 -p etc/slurmdbd.service %{buildroot}%{_unitdir}
+install -m 0644 -p etc/slurmrestd.service %{buildroot}%{_unitdir}
 
 # tmpfiles.d file for creating /run/slurm dir after reboot
 install -d -m 0755 %{buildroot}%{_tmpfilesdir}
@@ -359,6 +399,10 @@ rm -f %{buildroot}%{_mandir}/man5/cray*
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/.packlist
 rm -f %{buildroot}%{perl_vendorarch}/auto/Slurm*/Slurm*.bs
 rm -f %{buildroot}%{perl_archlib}/perllocal.pod
+%if 0%{?fedora} && (0%{?fedora} < 34)
+# remove unused slurmrestd service file
+rm -f %{buildroot}%{_unitdir}/slurmrestd.service
+%endif
 
 %ldconfig_scriptlets devel
 %ldconfig_scriptlets libs
@@ -505,6 +549,20 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_mandir}/man1/sview.1*
 
+%if 0%{?el7}
+%post gui
+/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun gui
+if [ $1 -eq 0 ] ; then
+    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans gui
+/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+%endif
+
 # ----------
 # Slurm-libs
 # ----------
@@ -538,9 +596,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %files rrdtool
 %{_libdir}/%{name}/ext_sensors_rrd.so
 
-# ---------
-# Slurmctld
-# ---------
+# ---------------
+# Slurm-slurmctld
+# ---------------
 
 %files slurmctld
 %{_mandir}/man8/slurmctld.8*
@@ -548,9 +606,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_unitdir}/slurmctld.service
 %ghost %{_rundir}/%{name}/slurmctld.pid
 
-# ------
-# Slurmd
-# ------
+# ------------
+# Slurm-slurmd
+# ------------
 
 %files slurmd
 %{_mandir}/man8/slurmd.8*
@@ -560,9 +618,9 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_unitdir}/slurmd.service
 %ghost %{_rundir}/%{name}/slurmd.pid
 
-# --------
-# Slurmdbd
-# --------
+# --------------
+# Slurm-slurmdbd
+# --------------
 
 %files slurmdbd
 %config(noreplace) %{_sysconfdir}/%{name}/slurmdbd.conf
@@ -573,6 +631,22 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %{_sysconfdir}/%{name}/slurmdbd.conf.example
 %{_unitdir}/slurmdbd.service
 %ghost %{_rundir}/%{name}/slurmdbd.pid
+
+# ----------------
+# Slurm-slurmrestd
+# ----------------
+
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%files slurmrestd
+%{_libdir}/%{name}/auth_jwt.so
+%{_libdir}/%{name}/openapi_dbv0_0_36.so
+%{_libdir}/%{name}/openapi_v0_0_36.so
+%{_libdir}/%{name}/openapi_v0_0_35.so
+%{_libdir}/%{name}/rest_auth_jwt.so
+%{_libdir}/%{name}/rest_auth_local.so
+%{_sbindir}/slurmrestd
+%{_unitdir}/slurmrestd.service
+%endif
 
 # --------------
 # Slurm-contribs
@@ -693,11 +767,27 @@ rm -f %{buildroot}%{perl_archlib}/perllocal.pod
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
-* Thu Apr 1 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-1
+* Tue May 4 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.6-1
+- Release of 20.11.6
+
+* Mon Apr 12 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-2
+- Add subpackage slurm-slurmrestd (Slurm REST API daemon)
+
+* Fri Mar 26 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.5-1
 - Release of 20.11.5
 
+* Tue Mar 02 2021 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 20.11.3-3
+- Rebuilt for updated systemd-rpm-macros
+  See https://pagure.io/fesco/issue/2583.
+
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 20.11.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jan 19 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.3-1
+- Release of 20.11.3
+
 * Wed Jan 6 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-2
-- Add to EPEL8
+- Minor spec adjustments
 
 * Tue Jan 5 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.2-1
 - Release of 20.11.2
