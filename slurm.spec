@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        20.11.6
+Version:        20.11.7
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -767,6 +767,10 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sat May 15 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.7-1
+- Update to 20.11.7
+- Closes security issue CVE-2021-31215
+
 * Tue May 4 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.6-1
 - Release of 20.11.6
 
