@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        20.11.7
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -445,6 +445,9 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_bindir}/%{name}-setuser
 %{_libdir}/%{name}/accounting_storage_*.so
 %{_libdir}/%{name}/acct_gather_*.so
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%{_libdir}/%{name}/auth_jwt.so
+%endif
 %{_libdir}/%{name}/auth_munge.so
 %{_libdir}/%{name}/burst_buffer_generic.so
 %{_libdir}/%{name}/cli_filter_*.so
@@ -638,7 +641,6 @@ fi
 
 %if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
 %files slurmrestd
-%{_libdir}/%{name}/auth_jwt.so
 %{_libdir}/%{name}/openapi_dbv0_0_36.so
 %{_libdir}/%{name}/openapi_v0_0_36.so
 %{_libdir}/%{name}/openapi_v0_0_35.so
@@ -767,6 +769,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon May 24 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.7-3
+- Move auth_jwt.so plugin to base package (#1947878)
+
 * Fri May 21 2021 Jitka Plesnikova <jplesnik@redhat.com> - 20.11.7-2
 - Perl 5.34 rebuild
 
