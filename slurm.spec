@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        20.11.7
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -769,6 +769,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Tue May 25 2021 Jitka Plesnikova <jplesnik@redhat.com> - 20.11.7-4
+- Perl 5.34 re-rebuild updated packages
+
 * Mon May 24 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.7-3
 - Move auth_jwt.so plugin to base package (#1947878)
 
