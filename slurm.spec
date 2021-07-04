@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.7
-Release:        4%{?dist}
+Version:        20.11.8
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -769,6 +769,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sat Jul 3 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.8-1
+- Update to 20.11.8
+
 * Tue May 25 2021 Jitka Plesnikova <jplesnik@redhat.com> - 20.11.7-4
 - Perl 5.34 re-rebuild updated packages
 
