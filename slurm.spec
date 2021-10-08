@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.8
-Release:        4%{?dist}
+Version:        21.08.2
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -35,6 +35,7 @@ Patch10:        slurm_perlapi_rpaths.patch
 Patch11:        slurm_html_doc_path.patch
 Patch12:        slurm_without_cray.patch
 Patch13:        slurm_check_version.patch
+Patch14:        slurm_detect_pmix_v4.patch
 
 # Other patches
 Patch20:        slurm_pmix_soname.patch
@@ -134,22 +135,6 @@ its respective man pages.
 Summary: Slurm shared libraries
 %description libs
 Slurm shared libraries.
-
-%package pmi
-Summary: The %{name} implementation of libpmi and libpmi2
-Requires: %{name}%{?_isa} = %{version}-%{release}
-Conflicts: pmix-pmi
-%description pmi
-The %{name}-pmi package contains the %{name} implementation of
-the libpmi and libpmi2 libraries.
-
-%package pmi-devel
-Summary: Development files for %{name}-pmi
-Requires: %{name}-pmi%{?_isa} = %{version}-%{release}
-Conflicts: pmix-pmi-devel
-%description pmi-devel
-The %{name}-pmi-devel package contains the development files for
-the libpmi and libpmi2 libraries.
 
 %package rrdtool
 Summary: Slurm rrdtool external sensor plugin
@@ -449,7 +434,8 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_libdir}/%{name}/auth_jwt.so
 %endif
 %{_libdir}/%{name}/auth_munge.so
-%{_libdir}/%{name}/burst_buffer_generic.so
+%{_libdir}/%{name}/burst_buffer_lua.so
+%{_libdir}/%{name}/cgroup_v1.so
 %{_libdir}/%{name}/cli_filter_*.so
 %{_libdir}/%{name}/core_spec_none.so
 %{_libdir}/%{name}/cred_*.so
@@ -463,7 +449,8 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_libdir}/%{name}/launch_slurm.so
 %{_libdir}/%{name}/mcs_*.so
 %{_libdir}/%{name}/mpi_*.so
-%{_libdir}/%{name}/node_features_knl_generic.so
+%{_libdir}/%{name}/node_features_*.so
+%{_libdir}/%{name}/openapi_*.so
 %{_libdir}/%{name}/power_none.so
 %{_libdir}/%{name}/preempt_*.so
 %{_libdir}/%{name}/prep_script.so
@@ -472,6 +459,7 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_libdir}/%{name}/route_*.so
 %{_libdir}/%{name}/sched_*.so
 %{_libdir}/%{name}/select_*.so
+%{_libdir}/%{name}/serializer_*.so
 %{_libdir}/%{name}/site_factor_none.so
 %{_libdir}/%{name}/slurmctld_nonstop.so
 %{_libdir}/%{name}/switch_*.so
@@ -505,6 +493,7 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_mandir}/man5/job_container.conf.5*
 %{_mandir}/man5/knl.conf.5*
 %{_mandir}/man5/nonstop.conf.5*
+%{_mandir}/man5/oci.conf.5*
 %{_mandir}/man5/slurm.conf.5*
 %{_mandir}/man5/topology.conf.5*
 %{_mandir}/man8/slurmrestd.8*
@@ -523,15 +512,18 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %dir %{_libdir}/%{name}/src
 %dir %{_libdir}/%{name}/src/sattach
 %dir %{_libdir}/%{name}/src/srun
+%{_includedir}/%{name}/pmi*.h
 %{_includedir}/%{name}/slurm.h
 %{_includedir}/%{name}/slurm_errno.h
+%{_includedir}/%{name}/slurm_version.h
 %{_includedir}/%{name}/slurmdb.h
 %{_includedir}/%{name}/smd_ns.h
 %{_includedir}/%{name}/spank.h
+%{_libdir}/libpmi.so
+%{_libdir}/libpmi2.so
 %{_libdir}/libslurm.so
 %{_libdir}/%{name}/src/sattach/sattach.wrapper.c
 %{_libdir}/%{name}/src/srun/srun.wrapper.c
-%{_mandir}/man3/*.3.*
 
 # ---------
 # Slurm-doc
@@ -571,26 +563,11 @@ fi
 # ----------
 
 %files libs
+%{_libdir}/libpmi.so.0*
+%{_libdir}/libpmi2.so.0*
 %{_libdir}/libslurm.so.*
 %{_libdir}/libslurmfull-*.so
 %{_libdir}/libslurm_pmi-*.so
-
-# ---------
-# Slurm-pmi
-# ---------
-
-%files pmi
-%{_libdir}/libpmi.so.0*
-%{_libdir}/libpmi2.so.0*
-
-# ---------------
-# Slurm-pmi-devel
-# ---------------
-
-%files pmi-devel
-%{_includedir}/%{name}/pmi*.h
-%{_libdir}/libpmi.so
-%{_libdir}/libpmi2.so
 
 # -------------
 # Slurm-rrdtool
@@ -769,6 +746,11 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Fri Oct 8 2021 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.2-1
+- Update to 21.08.2
+- Added Fedora patches to support pmix v4
+- Remove slurm-pmi(-devel) subpackages
+
 * Tue Aug 10 2021 Orion Poplawski <orion@nwra.com> - 20.11.8-4
 - Rebuild for hdf5 1.10.7
 
