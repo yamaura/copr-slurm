@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        21.08.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -318,7 +318,7 @@ EOF
 install -d -m 0755 %{buildroot}%{_var}/log/%{name}
 install -d -m 0755 %{buildroot}%{_sysconfdir}/logrotate.d
 cat >%{buildroot}%{_sysconfdir}/logrotate.d/%{name} <<EOF
-%{_var}/log/%{name}/* {
+%{_var}/log/%{name}/*.log {
     missingok
     notifempty
     copytruncate
@@ -408,6 +408,7 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %dir %{_var}/spool/%{name}/d
 %config(noreplace) %{_sysconfdir}/%{name}/cgroup.conf
 %config(noreplace) %{_sysconfdir}/%{name}/slurm.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_bindir}/sacct
 %{_bindir}/sacctmgr
 %{_bindir}/salloc
@@ -498,7 +499,6 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_mandir}/man5/topology.conf.5*
 %{_mandir}/man8/slurmrestd.8*
 %{_mandir}/man8/spank.8*
-%{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/%{name}/cgroup*.conf.example
 %{_sysconfdir}/%{name}/slurm.conf.example
 %{_tmpfilesdir}/slurm.conf
@@ -746,6 +746,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Oct 31 2021 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.2-2
+- Correct log rotation problems (#2016683, #2018508)
+
 * Fri Oct 8 2021 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.2-1
 - Update to 21.08.2
 - Added Fedora patches to support pmix v4
