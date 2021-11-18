@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        21.08.2
-Release:        2%{?dist}
+Version:        21.08.4
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -746,6 +746,10 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Wed Nov 17 2021 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.4-1
+- Update to 21.08.4
+- Closes security issue CVE-2021-43337
+
 * Sun Oct 31 2021 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.2-2
 - Correct log rotation problems (#2016683, #2018508)
 
