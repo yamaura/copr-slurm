@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        21.08.4
-Release:        2%{?dist}
+Version:        21.08.5
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -491,6 +491,7 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_mandir}/man5/cgroup.conf.5*
 %{_mandir}/man5/ext_sensors.conf.5*
 %{_mandir}/man5/gres.conf.5*
+%{_mandir}/man5/helpers.conf.5*
 %{_mandir}/man5/job_container.conf.5*
 %{_mandir}/man5/knl.conf.5*
 %{_mandir}/man5/nonstop.conf.5*
@@ -746,6 +747,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Fri Jan 14 2022 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.5-1
+- Update to 21.08.5
+
 * Sun Nov 21 2021 Orion Poplawski <orion@nwra.com> - 21.08.4-2
 - Rebuild for hdf5 1.12.1
 
