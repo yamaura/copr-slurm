@@ -11,7 +11,7 @@ index c187bb83bd..aabd7f3fe8 100644
 +++ b/src/plugins/burst_buffer/Makefile.am
 @@ -2,6 +2,3 @@
  
- SUBDIRS = generic
+ SUBDIRS = common generic
  
 -if WITH_JSON_PARSER
 -SUBDIRS += datawarp
