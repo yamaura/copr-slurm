@@ -15,7 +15,7 @@
 %endif
 
 Name:           slurm
-Version:        21.08.6
+Version:        21.08.8
 Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
@@ -748,6 +748,12 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu May 05 2022 Carl George <carl@george.computer> - 21.08.8-1
+- Update to 21.08.8, resolves: rhbz#2082276
+- Fix CVE-2022-29500, resolves: rhbz#2082286
+- Fix CVE-2022-29501, resolves: rhbz#2082289
+- Fix CVE-2022-29502, resolves: rhbz#2082293
+
 * Sat Apr 2 2022 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.6-1
 - Update to 21.08.6
 
