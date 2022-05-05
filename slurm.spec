@@ -15,8 +15,8 @@
 %endif
 
 Name:           slurm
-Version:        20.11.8
-Release:        2%{?dist}
+Version:        20.11.9
+Release:        1%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -769,6 +769,11 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Thu May 05 2022 Carl George <carl@george.computer> - 20.11.9-1
+- Update to 20.11.9, resolves: rhbz#2081896
+- Fix CVE-2022-29500, resolves: rhbz#2082285
+- Fix CVE-2022-29501, resolves: rhbz#2082288
+
 * Sun Oct 31 2021 Philip Kovacs <pkfed@fedoraproject.org> - 20.11.8-2
 - Correct log rotation problems (#2016683, #2018508)
 
