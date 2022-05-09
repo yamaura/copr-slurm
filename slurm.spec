@@ -1,5 +1,5 @@
 # Upstream tarballs use an additional release number
-%global ups_rel 1
+%global ups_rel 2
 
 %if "%{ups_rel}" == "1"
 %global name_version %{name}-%{version}
@@ -16,7 +16,7 @@
 
 Name:           slurm
 Version:        21.08.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
@@ -748,6 +748,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Mon May 9 2022 Philip Kovacs <pkfed@fedoraproject.org> - 21.08.8-2
+- Update to 21.08.8-2 (upstream re-release)
+
 * Thu May 05 2022 Carl George <carl@george.computer> - 21.08.8-1
 - Update to 21.08.8, resolves: rhbz#2082276
 - Fix CVE-2022-29500, resolves: rhbz#2082286
