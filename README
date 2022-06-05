@@ -1,0 +1,6 @@
+This project was forked from fedoraproject.
+
+* https://src.fedoraproject.org/rpms/slurm
+
+The branch `rawhide` follows upstream.
+Please see specific branch for example `epel9/20.11`
