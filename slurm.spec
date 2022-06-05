@@ -16,11 +16,11 @@
 
 Name:           slurm
 Version:        20.11.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple Linux Utility for Resource Management
 License:        GPLv2 and BSD
 URL:            https://slurm.schedmd.com/
-Source0:        http://www.schedmd.com/download/latest/%{name_version}.tar.bz2
+Source0:        http://download.schedmd.com/slurm/%{name_version}.tar.bz2
 Source1:        slurm.conf
 Source2:        slurmdbd.conf
 Source3:        slurm-sview.desktop
@@ -81,8 +81,8 @@ BuildRequires:  zlib-devel
 BuildRequires:  ucx-devel
 %endif
 
-# create slurm-slurmrestd package for Fedora >= 34 and EPEL7/8
-%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+# create slurm-slurmrestd package for Fedora >= 34 and EPEL7/8/9
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8} || 0%{?el9}
 BuildRequires:  http-parser-devel
 BuildRequires:  json-c-devel
 BuildRequires:  libjwt-devel
@@ -180,7 +180,7 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Slurm database daemon. Used to accept and process database RPCs and upload
 database changes to slurmctld daemons on each cluster.
 
-%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8} || 0%{?el9}
 %package slurmrestd
 Summary: Slurm REST API deamon
 Requires: %{name}%{?_isa} = %{version}-%{release}
@@ -446,7 +446,7 @@ rm -f %{buildroot}%{_unitdir}/slurmrestd.service
 %{_bindir}/%{name}-setuser
 %{_libdir}/%{name}/accounting_storage_*.so
 %{_libdir}/%{name}/acct_gather_*.so
-%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8} || 0%{?el9}
 %{_libdir}/%{name}/auth_jwt.so
 %endif
 %{_libdir}/%{name}/auth_munge.so
@@ -639,7 +639,7 @@ fi
 # Slurm-slurmrestd
 # ----------------
 
-%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8}
+%if (0%{?fedora} >= 34) || 0%{?el7} || 0%{?el8} || 0%{?el9}
 %files slurmrestd
 %{_libdir}/%{name}/openapi_dbv0_0_36.so
 %{_libdir}/%{name}/openapi_v0_0_36.so
@@ -769,6 +769,9 @@ fi
 %systemd_postun_with_restart slurmdbd.service
 
 %changelog
+* Sun Jun 05 2022 Yuki Yamaura <ymruki@gmail.com> - 20.11.9-2
+- Import slurm-20.11 from el8 to el9
+
 * Thu May 05 2022 Carl George <carl@george.computer> - 20.11.9-1
 - Update to 20.11.9, resolves: rhbz#2081898
 - Fix CVE-2022-29500, resolves: rhbz#2082285
